@@ -51,10 +51,14 @@ Thread function handler for process memory usage watching
 	MAX_MEM = maxMemUsage
 
 if __name__=="__main__":
-	assert(len(sys.argv) >= 2)
+	if len(sys.argv) < 2:
+		print("Can't monitor no process! (Try `--help` or provide your process args)")
+		exit(1)
 	if "--help" in sys.argv or "-h" in sys.argv:
 		print(f"""pmwatch -- (p)[rocess|olling] (m)[ax|emory] (watch)er
 	A simple tool for watching process memory and reporting the max usage.
+Usage:
+	pmwatch [process args...]
 	Set polling interval (in seconds) by setting PMWATCH_INTERVAL environment variable (Default: {INTERVAL})""")
 		exit(0)
 	
