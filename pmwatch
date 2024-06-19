@@ -22,7 +22,6 @@ import os
 # import threading
 
 INTERVAL=0.001
-MAX_MEM=0
 
 def startProcess(command) -> tuple: # psutil.Process:
 	pr = subprocess.Popen(command)
@@ -35,7 +34,6 @@ def pollProcess(proc : psutil.Process, popen : subprocess.Popen):
 	'''
 Thread function handler for process memory usage watching
 	'''
-	global MAX_MEM
 	maxMemUsage = 0
 	# print("Polling memory...")
 	while True:
@@ -47,14 +45,13 @@ Thread function handler for process memory usage watching
 			maxMemUsage = max(maxMemUsage, curMemUsage)
 			time.sleep(INTERVAL)
 		except psutil.NoSuchProcess:
-			MAX_MEM = maxMemUsage
-			return
+			return maxMemUsage
 		except KeyboardInterrupt:
 			# Stop polling if we get a keyboard interrupt
 			pass
 		# print(f"Poll {maxMemUsage} bytes")
 
-	MAX_MEM = maxMemUsage
+	return maxMemUsage
 
 if __name__=="__main__":
 	if len(sys.argv) < 2:
@@ -79,17 +76,17 @@ Usage:
 	proc, pr = startProcess(procArgs)
 	# _, _ = pr.communicate()
 	# Just run the polling in the main thread
-	pollProcess(proc, pr)
+	maxMemUsage = pollProcess(proc, pr)
 	#t = threading.Thread(target=pollProcess, args=(proc, pr, ))
 	#t.run()
 	#t.join()
 	memStr = ""
-	if MAX_MEM >= 1073741824:
-		memStr = f"{MAX_MEM / 1073741824} GB"
-	elif MAX_MEM >= 1048576:
-		memStr = f"{MAX_MEM / 1048576} MB"
-	elif MAX_MEM >= 1024:
-		memStr = f"{MAX_MEM / 1024} kB"
+	if maxMemUsage >= 1073741824:
+		memStr = f"{maxMemUsage / 1073741824} GB"
+	elif maxMemUsage >= 1048576:
+		memStr = f"{maxMemUsage / 1048576} MB"
+	elif maxMemUsage >= 1024:
+		memStr = f"{maxMemUsage / 1024} kB"
 	else:
-		memStr = f"{MAX_MEM} B"
+		memStr = f"{maxMemUsage} B"
 	print(f"At polling interval of {INTERVAL} seconds, this process took at most {memStr} of memory")
