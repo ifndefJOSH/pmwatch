@@ -38,15 +38,21 @@ Thread function handler for process memory usage watching
 	global MAX_MEM
 	maxMemUsage = 0
 	# print("Polling memory...")
-	while proc.status() != psutil.STATUS_ZOMBIE and popen.pid in psutil.pids():
+	while True:
 		try:
+			# Put this line here so we can (probably) gracefully exit and still report max mem usage if we get a keyboard interrupt
+			if not (proc.status() != psutil.STATUS_ZOMBIE and popen.pid in psutil.pids()):
+				break
 			curMemUsage = getMemoryUsage(proc)
+			maxMemUsage = max(maxMemUsage, curMemUsage)
+			time.sleep(INTERVAL)
 		except psutil.NoSuchProcess:
 			MAX_MEM = maxMemUsage
 			return
-		maxMemUsage = max(maxMemUsage, curMemUsage)
+		except KeyboardInterrupt:
+			# Stop polling if we get a keyboard interrupt
+			pass
 		# print(f"Poll {maxMemUsage} bytes")
-		time.sleep(INTERVAL)
 
 	MAX_MEM = maxMemUsage
 
