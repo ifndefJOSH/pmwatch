@@ -76,8 +76,11 @@ Usage:
 	if "PMWATCH_INTERVAL" in os.environ:
 		try:
 			INTERVAL = int(os.environ["PMWATCH_INTERVAL"])
+			if INTERVAL > 1.0:
+				print("(Warning) Polling interval is greater than 1 second!")
 		except ValueError:
-			print(f"Cannot use non-parsable interval of {os.environ['PMWATCH_INTERVAL']}")
+			print(f"Cannot use non-parsable interval of {os.environ['PMWATCH_INTERVAL']}.")
+			print("Try resetting the PMWATCH_INTERVAL environment variable.")
 			sys.exit(1)
 
 	procArgs = sys.argv[1::]
