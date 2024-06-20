@@ -75,7 +75,7 @@ Usage:
 	
 	if "PMWATCH_INTERVAL" in os.environ:
 		try:
-			INTERVAL = int(os.environ["PMWATCH_INTERVAL"])
+			INTERVAL = float(os.environ["PMWATCH_INTERVAL"])
 			if INTERVAL > 1.0:
 				print("(Warning) Polling interval is greater than 1 second!")
 		except ValueError:
@@ -84,7 +84,11 @@ Usage:
 			sys.exit(1)
 
 	procArgs = sys.argv[1::]
-	proc, pr = startProcess(procArgs)
+	try:
+		proc, pr = startProcess(procArgs)
+	except FileNotFoundError:
+		print(f"Program `{procArgs[0]}` does not exist")				
+		exit(1)
 	# _, _ = pr.communicate()
 	# Just run the polling in the main thread
 	maxMemUsage = pollProcess(proc, pr)
